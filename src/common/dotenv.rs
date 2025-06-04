@@ -21,7 +21,7 @@ impl Default for Dotenv {
 impl Dotenv {
 
   fn get_var(key: &str) -> Option<String> {
-    std::env::var(key).or_else(|_| dotenv::var(key)).ok()
+    dotenv::var(key).ok()
   }
 
   fn get_db_type<T: AsRef<str>>(t: Option<T>) -> Option<DatabaseType> {
@@ -35,7 +35,7 @@ impl Dotenv {
     if let Some(url_str) = Self::get_var("DATABASE_URL") {
       let url = Url::parse(&url_str).expect("Invalid DATABASE_URL");
 
-      println!("{:?}", url);
+      println!("{:?} DB_URL", url_str);
       return Dotenv {
         db_type: Self::get_db_type(Some(url.scheme())),
         db_user: Some(url.username().to_string()).filter(|s| !s.is_empty()),
