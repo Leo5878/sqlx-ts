@@ -35,7 +35,6 @@ impl Dotenv {
     if let Some(url_str) = Self::get_var("DATABASE_URL") {
       let url = Url::parse(&url_str).expect("Invalid DATABASE_URL");
 
-      println!("{?:} DB_URL", url_str);
       return Dotenv {
         db_type: Self::get_db_type(Some(url.scheme())),
         db_user: Some(url.username().to_string()).filter(|s| !s.is_empty()),
