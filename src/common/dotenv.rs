@@ -1,4 +1,5 @@
 use crate::common::types::DatabaseType;
+use url::{Url};
 
 #[derive(Clone, Debug)]
 pub struct Dotenv {
@@ -23,21 +24,34 @@ impl Dotenv {
     std::env::var(key).or_else(|_| dotenv::var(key)).ok()
   }
 
+  fn get_db_type<T: AsRef<str>>(t: Option<T>) -> Option<DatabaseType> {
+    t.map(|val| match val.as_ref() {
+        "mysql" => DatabaseType::Mysql,
+        _ => DatabaseType::Postgres,
+    })
+  }
+
   pub fn new() -> Dotenv {
+    if let Some(url_str) = Self::get_var("DATABASE_URL") {
+      let url = Url::parse(&url_str).expect("Invalid DATABASE_URL");
+
+      println!("{:?}", url);
+      return Dotenv {
+        db_type: Self::get_db_type(Some(url.scheme())),
+        db_user: Some(url.username().to_string()).filter(|s| !s.is_empty()),
+        db_pass: url.password().map(|s| s.to_string()),
+        db_host: url.host_str().map(|s| s.to_string()),
+        db_port: Some(url.port()).expect("DB_PORT is missing"),
+        db_name: Some(url.path().trim_start_matches('/').to_string()),
+        pg_search_path: Self::get_var("PG_SEARCH_PATH"),
+      };
+    }
+
     Dotenv {
-      db_type: match Self::get_var("DB_TYPE") {
-        None => None,
-        Some(val) => {
-          if val == "mysql" {
-            Some(DatabaseType::Mysql)
-          } else {
-            Some(DatabaseType::Postgres)
-          }
-        }
-      },
+      db_type: Self::get_db_type(Self::get_var("DB_TYPE")),
       db_user: Self::get_var("DB_USER"),
       db_host: Self::get_var("DB_HOST"),
-      db_port: Self::get_var("DB_HOST")
+      db_port: Self::get_var("DB_PORT")
         .map(|val| val.parse::<u16>()
         .expect("DB_PORT is not a valid integer")),
       db_pass: Self::get_var("DB_PASS"),

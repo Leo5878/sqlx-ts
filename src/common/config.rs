@@ -13,6 +13,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
 use std::str::FromStr;
+use url::{Url, Host, Position};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct SqlxConfig {

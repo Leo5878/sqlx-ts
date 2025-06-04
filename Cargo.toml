@@ -35,6 +35,7 @@ async-recursion = "1.1.1"
 async-trait = "0.1.82"
 bb8 = "0.8.5"
 log = "0.4.22"
+url = "2.5.4"
 
 [dev-dependencies]
 assert_cmd = "2.0.16"
