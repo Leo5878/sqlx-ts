@@ -1,5 +1,6 @@
 use crate::common::types::DatabaseType;
 use url::{Url};
+use dotenv;
 
 #[derive(Clone, Debug)]
 pub struct Dotenv {
@@ -14,7 +15,7 @@ pub struct Dotenv {
 
 impl Default for Dotenv {
   fn default() -> Self {
-    Self::new()
+    Self::new(None)
   }
 }
 
@@ -31,7 +32,11 @@ impl Dotenv {
     })
   }
 
-  pub fn new() -> Dotenv {
+  pub fn new(path_to_dotenv: Option<String>) -> Dotenv {
+    if let Some(value) = path_to_dotenv {
+      dotenv::from_path(value).ok();
+    }
+
     if let Some(url_str) = Self::get_var("DATABASE_URL") {
       let url = Url::parse(&url_str).expect("Invalid DATABASE_URL");
 
