@@ -32,7 +32,7 @@ impl Dotenv {
     })
   }
 
-  pub fn new(path_to_dotenv: Option<String>) -> Dotenv {
+  pub fn new(path_to_dotenv: Option<std::path::PathBuf>) -> Dotenv {
     if let Some(value) = path_to_dotenv {
       dotenv::from_path(value).ok();
     }

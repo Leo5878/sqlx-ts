@@ -1,6 +1,7 @@
 use crate::common::types::{DatabaseType, JsExtension, LogLevel};
 use clap::Parser;
 use std::fmt;
+use std::path::PathBuf;
 
 impl fmt::Display for JsExtension {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -17,7 +18,7 @@ impl fmt::Display for JsExtension {
 pub struct Cli {
   /// Path to the Typescript or Javascript project
   #[clap(parse(from_os_str))]
-  pub path: std::path::PathBuf,
+  pub path: PathBuf,
 
   /// Javascript Extension
   #[clap(
@@ -61,7 +62,7 @@ pub struct Cli {
 
   /// Path to the file based configuration
   #[clap(long, parse(from_os_str))]
-  pub config: Option<std::path::PathBuf>,
+  pub config: Option<PathBuf>,
 
   /// generate types of raw SQLs using default configuration
   #[clap(long, short)]
@@ -69,13 +70,13 @@ pub struct Cli {
 
   /// generates types in a target file path (example: src/app/queries.ts)
   #[clap(long, parse(from_os_str))]
-  pub generate_path: Option<std::path::PathBuf>,
+  pub generate_path: Option<PathBuf>,
 
   /// log level to be used for the CLI debug > info > warning > error
   #[clap(value_enum, long)]
   pub log_level: Option<LogLevel>,
 
-  /// Dotfile name (example: .env or .env.dev) [default: .env or environment]
+  /// Name or path to the dotfile (example: .env or .env.dev) [default: .env or environment]
   #[clap(long)]
-  pub env: Option<String>
+  pub env: Option<PathBuf>
 }
