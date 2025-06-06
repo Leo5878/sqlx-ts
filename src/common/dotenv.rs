@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use crate::common::types::DatabaseType;
 use url::{Url};
 use dotenv;
@@ -34,7 +36,7 @@ impl Dotenv {
 
   pub fn new(path_to_dotenv: Option<std::path::PathBuf>) -> Dotenv {
     if let Some(value) = path_to_dotenv {
-      dotenv::from_path(value).ok();
+      dotenv::from_path(PathBuf::from(value)).ok();
     }
 
     if let Some(url_str) = Self::get_var("DATABASE_URL") {
