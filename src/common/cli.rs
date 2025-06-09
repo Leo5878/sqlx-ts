@@ -78,5 +78,5 @@ pub struct Cli {
 
   /// Name or path to the dotfile (example: .env or .env.dev) [default: .env or environment]
   #[clap(long)]
-  pub env: Option<String>,
+  pub env: Option<PathBuf>,
 }
