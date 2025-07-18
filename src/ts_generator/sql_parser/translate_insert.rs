@@ -66,6 +66,22 @@ VALUES (value1, value2, value3, ...);
         }
       }
     }
+
+    SetExpr::Select(select) => {
+    for item in &select.projection {
+        if let SelectItem::UnnamedExpr(expr) = item {
+            if let Some(placeholder) = get_expr_placeholder(expr) {
+                let column = columns
+                  .get(0)
+                  .map(|c| c.value.as_str())
+                  .unwrap_or("unknown");
+                if let Some(field) = table_details.get(column) {
+                    ts_query.insert_param(&field.field_type, &field.is_nullable, &Some(placeholder))?;
+                }
+            }
+        }
+      }
+    }
     _ => unimplemented!(),
   }
 
