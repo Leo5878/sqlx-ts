@@ -1,6 +1,11 @@
-#!/bin/bash
+#!/bin/sh
 
 set -e
+
+echo "⚠️  This install.sh script is deprecated and will be removed in a future release."
+echo "   Please use the Node.js installer instead:"
+echo "   npm install -g sqlx-ts"
+echo ""
 
 help() {
     cat <<'EOF'
@@ -12,7 +17,7 @@ Options:
     -f, --force           Force overwriting an existing binary
     --os OS               Your current OS, it's used to determine the type of binary to be installed (one of darwin or win32 or linux)
     --cpu CPU             Your current CPU architecture, it's used to determine the type of binary to be installed (one of x32 or x64 or arm64)
-    --artifact ARTIFACT   Specific artifact to install. Please find the artifact name from https://github.com/JasonShin/sqlx-ts/releases (e.g. sqlx_ts_v0.1.0_x86_64-apple-darwin.zip)
+    --artifact ARTIFACT   Specific artifact to install. Please find the artifact name from https://github.com/JasonShin/sqlx-ts/releases (e.g. sqlx-ts-v0.26.0-macos-arm.zip)
     --tag TAG             Tag (version) of the crate to install (default <latest release>)
     --to LOCATION         Where to install the binary (default to the current directory)
 EOF
@@ -27,8 +32,8 @@ say_err() {
 }
 
 err() {
-    if [ ! -z $td ]; then
-        rm -rf $td
+    if [ -n "$td" ]; then
+        rm -rf "$td"
     fi
 
     say_err "ERROR $1"
@@ -119,17 +124,23 @@ say_err "GitHub repository: $url"
 url="$url/releases"
 
 if [ -z $tag ]; then
-    if [ ! -z $artifact ]; then
+    if [ -n $artifact ]; then
       echo "artifact was given, it will override tag - artifact: $artifact, tag: $tag"
     fi
 
     tag=$(curl --silent "https://api.github.com/repos/jasonshin/sqlx-ts/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
     say_err "Tag: latest ($tag)"
 else
-    if [[ $tag != v* ]]; then
-      echo "received tag does not start with v, it will be prefixed with v - tag: $tag"
-      tag="v$tag"
-    fi
+    case $tag in
+        v*)
+            # Tag already starts with v
+            ;;
+        *)
+            # Tag doesn't start with v, add it
+            echo "received tag does not start with v, it will be prefixed with v - tag: $tag"
+            tag="v$tag"
+            ;;
+    esac
 
     say_err "Tag: $tag"
 fi
@@ -144,22 +155,22 @@ say_err "Installing to: $dest"
 # if only OS is given use OS + version | latest
 if [ -z $artifact ]; then
   target=""
-  if [ "$os" == "darwin" ]; then
-    if [ "$cpu" == "arm64" ]; then
+  if [ "$os" = "darwin" ]; then
+    if [ "$cpu" = "arm64" ]; then
       target="macos-arm.zip"
     else
       target="macos-64-bit.zip"
     fi
-  elif [ "$os" == "win32" ]; then
-    if [ "$cpu" == "x64" ]; then
+  elif [ "$os" = "win32" ]; then
+    if [ "$cpu" = "x64" ]; then
       target="windows-64-bit.zip"
     else
       target="windows-32-bit.zip"
     fi
-  elif [ "$os" == "linux" ]; then
-    if [ "$cpu" == "x64" ]; then
+  elif [ "$os" = "linux" ]; then
+    if [ "$cpu" = "x64" ]; then
       target="linux-64-bit.zip"
-    elif [ "$cpu" == "arm64" ]; then
+    elif [ "$cpu" = "arm64" ]; then
       target="linux-arm.zip"
     else
       target="linux-32-bit.zip"
@@ -175,7 +186,7 @@ if [ -z $artifact ]; then
   fi
   url="$url/download/$tag/sqlx-ts-${tag}-${target}"
 else
-  tag="$(cut -d'_' -f3 <<< "$artifact")"
+  tag=$(echo "$artifact" | cut -d'-' -f3)
   url="$url/download/$tag/$artifact"
 fi
 
@@ -185,7 +196,7 @@ echo "URL to download $url"
 
 curl -LSfs $url --output $td/sqlx-ts.zip
 unzip -j $td/sqlx-ts.zip -d $td
-if [ "$os" == "win32" ]; then
+if [ "$os" = "win32" ]; then
     cp $td/sqlx-ts.exe .
 else
     cp $td/sqlx-ts .
